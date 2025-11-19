@@ -1,11 +1,11 @@
-import { Home, Layout } from "lucide-react"
+import {  Layout } from "lucide-react"
 import Dashboard from "./pages/Dashboard"
 import { Routes } from "react-router-dom"
 import ResumeBuilder from "./pages/ResumeBuilder"
 import { Route } from "react-router-dom"
 import Preview from "./pages/Preview"
 import Login from "./pages/Login"
-
+import Home from "./pages/Home"
 
 function App() {
  
