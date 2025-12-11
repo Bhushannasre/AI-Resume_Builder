@@ -1,4 +1,4 @@
-import {  Layout } from "lucide-react"
+import Layout from "./pages/Layout"
 import Dashboard from "./pages/Dashboard"
 import { Routes } from "react-router-dom"
 import ResumeBuilder from "./pages/ResumeBuilder"
@@ -14,7 +14,7 @@ function App() {
     <>
    <Routes>
     <Route path='/' element={<Home/>}></Route>
-    <Route path='app' element={<Layout/>  }>
+    <Route path='app' element={<Layout/>}>
       <Route index element={<Dashboard/>}/>
       <Route path='builder/:resumeId' element={<ResumeBuilder/>}/>
     </Route>
