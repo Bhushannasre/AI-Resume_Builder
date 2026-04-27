@@ -4,7 +4,12 @@ import { useParams, Link} from "react-router-dom";
 import { ArrowLeftIcon, FileText, User, Briefcase, GraduationCap, FolderIcon, Sparkle, ChevronLeft, ChevronRight } from "lucide-react";
 import PersonalInfoForm from "../components/PersonalInfoForm.jsx";
 import ResumePreview from "../components/ResumePreview.jsx";
-
+import TemplateSelector from "../components/TemplateSelector.jsx";
+import ColorPicker from "../components/ColorPicker.jsx";
+import ProfessionalSummaryForm from "../components/ProfessionalSummaryForm.jsx";
+import ExperienceForm from "../components/ExperienceForm.jsx"; 
+import EducationForm from "../components/EducationForm.jsx"; 
+import ProjectForm from "../components/ProjectForm.jsx";
 function ResumeBuilder(){
     const {resumeId}= useParams();  
     const [resumeData, setResumeData] = useState({
@@ -14,6 +19,7 @@ function ResumeBuilder(){
         professional_summary: "",
         experience: [],
         education: [],
+        projects: [],
         skills: [],
         template: "classic",
         accent_color: "#3B82F6",
@@ -62,7 +68,15 @@ function ResumeBuilder(){
                 style={{width:`${activeSectionIndex * 100/(sections.length - 1)}%`}}/>
                 {/* Section Navigation */}
                 <div className="flex justify-between items-center mb-6 border-b border-gray-300 py-1">
-                 <div></div>
+
+                 <div className="flex items-center gap-2">
+                    <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> 
+                        setResumeData(prev => ({...prev, template}))
+                    }/>
+                    <ColorPicker selectedColor={resumeData.accent_color} onChange={(accent_color)=> 
+                        setResumeData(prev => ({...prev, accent_color}))
+                    }/>
+                 </div>
                  <div className="flex items-center">
                     {activeSectionIndex !== 0 && (
                         <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.max(prevIndex-1, 0))} className="flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 
@@ -83,7 +97,23 @@ function ResumeBuilder(){
                         <PersonalInfoForm data={resumeData.personal_info} onChange={(data) => setResumeData(prev=>({...prev, personal_info: data}))} removeBackground={removeBackground} 
                         setRemoveBackground={setRemoveBackground}/>
                     )}
-
+                    {
+                        activeSection.id === 'summary' && (
+                            <ProfessionalSummaryForm data={resumeData.professional_summary} onChange={(data) => setResumeData(prev=>({...prev, professional_summary: data}))} setResumeData={setResumeData}/>
+                   ) }
+                {
+                        activeSection.id === 'experience' && (
+                            <ExperienceForm data={resumeData.experience} onChange={(data) => setResumeData(prev=>({...prev, experience: data}))}/>
+                   ) }
+                     {
+                        activeSection.id === 'education' && (
+                            <EducationForm data={resumeData.education} onChange={(data) => setResumeData(prev=>({...prev, education: data}))}/>
+                   ) }
+                   {
+                        activeSection.id === 'projects' && (
+                            <ProjectForm data={resumeData.projects} onChange={(data) => setResumeData(prev=>({...prev, projects: data}))}/>
+                        )
+                    }
                 </div>
               </div>
             </div>

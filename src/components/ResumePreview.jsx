@@ -22,7 +22,7 @@ function ResumePreview({data, template, accentColor, classes=""}) {
             + classes}>
             {renderTemplate()}
           </div>
-          <style jsx>
+          <style >
             {`
             @page{
              size:letter;
