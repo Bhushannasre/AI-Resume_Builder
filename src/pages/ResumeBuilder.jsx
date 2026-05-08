@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { dummyResumeData } from "../assets/assets";
 import { useParams, Link } from "react-router-dom";
-import html2pdf from "html2pdf.js";
+import html2pdf from "html2pdf.js/dist/html2pdf.bundle.min.js";
 
 import {
   ArrowLeftIcon,
@@ -60,7 +60,6 @@ function ResumeBuilder() {
 
   const activeSection = sections[activeSectionIndex];
 
-  /* ---------------- Load Resume ---------------- */
   useEffect(() => {
     const resume = dummyResumeData.find((r) => r._id === resumeId);
     if (resume) {
@@ -69,13 +68,10 @@ function ResumeBuilder() {
     }
   }, [resumeId]);
 
-  /* ---------------- Actions ---------------- */
-
   const changeResumeVisibility = () => {
     setResumeData((prev) => ({ ...prev, public: !prev.public }));
   };
 
-  // ✅ FIXED SHARE (works everywhere)
   const handleShare = async () => {
     const resumeUrl = `${window.location.origin}/view/${resumeId}`;
 
@@ -95,20 +91,62 @@ function ResumeBuilder() {
     }
   };
 
-  // ✅ FIXED DOWNLOAD (real PDF)
+  // ✅ FULL FIXED DOWNLOAD
   const downloadResume = () => {
     const element = document.getElementById("resume-preview");
     if (!element) return;
+
+    const nodes = element.querySelectorAll("*");
+
+    const originalStyles = [];
+
+    nodes.forEach((node, index) => {
+      const style = window.getComputedStyle(node);
+
+      originalStyles[index] = {
+        el: node,
+        color: node.style.color,
+        backgroundColor: node.style.backgroundColor,
+        borderColor: node.style.borderColor,
+      };
+
+      if (style.color.includes("oklch")) {
+        node.style.color = "#000";
+      }
+
+      if (style.backgroundColor.includes("oklch")) {
+        node.style.backgroundColor = "#fff";
+      }
+
+      if (style.borderColor.includes("oklch")) {
+        node.style.borderColor = "#000";
+      }
+    });
 
     const opt = {
       margin: 0.5,
       filename: "resume.pdf",
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+      },
       jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
     };
 
-    html2pdf().set(opt).from(element).save();
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .catch((err) => console.error("PDF error:", err))
+      .finally(() => {
+        // restore styles
+        originalStyles.forEach(({ el, color, backgroundColor, borderColor }) => {
+          el.style.color = color;
+          el.style.backgroundColor = backgroundColor;
+          el.style.borderColor = borderColor;
+        });
+      });
   };
 
   return (
@@ -125,11 +163,9 @@ function ResumeBuilder() {
       <div className="max-w-7x1 max-auto px-4 pb-8">
         <div className="grid lg:grid-cols-12 gap-8">
 
-          {/* LEFT PANEL */}
           <div className="realtive lg:col-span-5 rounded-lg overflow-hidden">
             <div className="bg-white rounded -lg shadow-sm border border-gray-200 p-6 pt-1">
 
-              {/* Progress bar */}
               <hr className="absolute top-0 left-0 right-0 border-2 border-gray-200" />
               <hr
                 className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-2000"
@@ -140,7 +176,6 @@ function ResumeBuilder() {
                 }}
               />
 
-              {/* Navigation */}
               <div className="flex justify-between items-center mb-6 border-b border-gray-300 py-1">
 
                 <div className="flex items-center gap-2">
@@ -194,7 +229,6 @@ function ResumeBuilder() {
                 </div>
               </div>
 
-              {/* FORM */}
               <div className="space-y-6">
                 {activeSection.id === "personal_info" && (
                   <PersonalInfoForm
@@ -273,43 +307,29 @@ function ResumeBuilder() {
             </div>
           </div>
 
-          {/* RIGHT PANEL */}
           <div className="lg:col-span-7 max-lg:mt-6">
             <div className="relative w-full">
               <div className="absolute bottom-3 left-0 right-0 flex items-center justify-end gap-2">
 
                 {resumeData.public && (
-                  <button
-                    onClick={handleShare}
-                    className="flex item-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors"
-                  >
+                  <button onClick={handleShare} className="flex item-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg">
                     <Share2Icon className="size-4" />Share
                   </button>
                 )}
 
-                <button
-                  onClick={changeResumeVisibility}
-                  className="flex item-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-pink-100 to-pink-200 text-pink-600 rounded-lg ring-pink-300 hover:ring transition-colors"
-                >
-                  {resumeData.public ? (
-                    <EyeIcon className="size-4" />
-                  ) : (
-                    <EyeOffIcon className="size-4" />
-                  )}
+                <button onClick={changeResumeVisibility} className="flex item-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-pink-100 to-pink-200 text-pink-600 rounded-lg">
+                  {resumeData.public ? <EyeIcon className="size-4" /> : <EyeOffIcon className="size-4" />}
                   {resumeData.public ? "Public" : "Private"}
                 </button>
 
-                <button
-                  onClick={downloadResume}
-                  className="flex item-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-green-300 hover:ring transition-colors"
-                >
+                <button onClick={downloadResume} className="flex item-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg">
                   <DownloadIcon className="size-4" />
                   Download
                 </button>
+
               </div>
             </div>
 
-            {/* IMPORTANT: wrap for PDF */}
             <div id="resume-preview">
               <ResumePreview
                 data={resumeData}
