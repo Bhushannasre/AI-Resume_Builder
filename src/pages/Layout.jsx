@@ -1,14 +1,29 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-function Layout(){
+import { useSelector } from 'react-redux';
+import { Loader } from "lucide-react";
+import Login from "./Login";
+
+
+function Layout() {
+    const { user, loading } = useSelector(state => state.auth);
+
+    if (loading) {
+        return <Loader />; 
+    }
+
     return (
         <div>
-            <div className="min-h-screen bg-gray-50">
-                <Navbar/>
-                <Outlet/>
-            </div>
+            {user ? ( 
+                <div className="min-h-screen bg-gray-50">
+                    <Navbar />
+                    <Outlet />
+                </div>
+            ) : (
+                <Login />  
+            )}
         </div>
-    )
-
+    );
 }
+
 export default Layout;
