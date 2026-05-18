@@ -6,7 +6,7 @@ import {
     UploadCloudIcon,
     XIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { UploadCloud } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -37,14 +37,14 @@ function Dashboard() {
     const authHeader = { headers: { Authorization: `Bearer ${token}` } };
 
     // ─── Load all resumes ────────────────────────────────────────────────────
-    const loadAllResumes = async () => {
+    const loadAllResumes = useCallback(async () => {
         try {
             const { data } = await api.get("/api/resumes", authHeader);
             setAllResumes(data.resumes || []);
         } catch (error) {
             toast.error(error?.response?.data?.message || error.message);
         }
-    };
+    }, [token]);
 
     // ─── Create blank resume ─────────────────────────────────────────────────
     const createResume = async (event) => {
@@ -133,7 +133,7 @@ function Dashboard() {
 
     useEffect(() => {
         loadAllResumes();
-    }, []);
+    }, [loadAllResumes]);
 
     return (
         <div>

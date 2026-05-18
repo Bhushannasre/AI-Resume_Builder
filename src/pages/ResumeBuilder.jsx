@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import html2pdf from "html2pdf.js/dist/html2pdf.bundle.min.js";
 import {
@@ -63,7 +63,7 @@ function ResumeBuilder() {
     const activeSection = sections[activeSectionIndex];
 
     // ─── Load resume from API ────────────────────────────────────────────────
-    const loadExistingResume = async () => {
+    const loadExistingResume = useCallback(async () => {
         try {
             const { data } = await api.get(`/api/resumes/get/${resumeId}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -75,11 +75,11 @@ function ResumeBuilder() {
         } catch (error) {
             toast.error("Failed to load resume: " + error.message);
         }
-    };
+    }, [resumeId, token]);
 
     useEffect(() => {
         loadExistingResume();
-    }, [resumeId]);
+    }, [loadExistingResume]);
 
     // ─── Toggle public/private ───────────────────────────────────────────────
     const changeResumeVisibility = async () => {
@@ -157,6 +157,7 @@ function ResumeBuilder() {
 
     // ─── Save resume ─────────────────────────────────────────────────────────
     const saveResume = async () => {
+        const toastId = toast.loading("Saving...");
         try {
             const updatedResumeData = structuredClone(resumeData);
             if (typeof resumeData.personal_info.image === "object") {
@@ -175,9 +176,9 @@ function ResumeBuilder() {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setResumeData(data.resume);
-            toast.success(data.message);
+            toast.success("Saved successfully!", { id: toastId });
         } catch (error) {
-            toast.error("Error saving resume: " + error.message);
+            toast.error("Failed to save: " + error.message, { id: toastId });
         }
     };
 
@@ -284,12 +285,7 @@ function ResumeBuilder() {
                             {/* Save button */}
                             <div>
                                 <button
-                                    onClick={() =>
-                                        toast.promise(saveResume(), {
-                                            loading: "Saving...",
-                                            error: "Failed to save",
-                                        })
-                                    }
+                                    onClick={saveResume}
                                     className="bg-gradient-to-br from-green-100 to-green-200 ring-1 ring-green-300 text-green-600 hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm"
                                 >
                                     Save Changes
